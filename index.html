@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="output.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center">
+  <h1 class="text-4xl font-bold mb-6">Tic Tac Toe</h1>
+
+  
+  <div class="flex gap-4 mb-8">
+    <button id="playComputer" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-md text-lg font-semibold">Single Player</button>
+    <button id="playManual" class="px-6 py-2 bg-green-500 hover:bg-green-600 rounded-md text-lg font-semibold">Two Players</button>
+  </div>
+
+  
+  <div id="gameBoard" class="grid grid-cols-3 gap-4 w-72 h-72 hidden">
+ 
+  </div>
+
+ 
+  <p id="status" class="text-lg font-semibold mt-4 hidden"></p>
+
+  <script>
+    const playComputerBtn = document.getElementById('playComputer');
+    const playManualBtn = document.getElementById('playManual');
+    const gameBoard = document.getElementById('gameBoard');
+    const statusText = document.getElementById('status');
+
+    let currentPlayer = 'X';
+    let gameMode = '';
+    let board = Array(9).fill(null);
+
+    
+    function renderBoard() {
+      gameBoard.innerHTML = '';
+      board.forEach((value, index) => {
+        const cell = document.createElement('div');
+        cell.classList.add('flex', 'items-center', 'justify-center', 'bg-gray-800', 'text-3xl', 'font-bold', 'cursor-pointer', 'rounded-md', 'h-20', 'w-20');
+        cell.dataset.index = index;
+        cell.textContent = value;
+
+        cell.addEventListener('click', handleCellClick);
+        gameBoard.appendChild(cell);
+      });
+    }
+
+  
+    function handleCellClick(event) {
+      const index = event.target.dataset.index;
+
+      if (board[index] || checkWinner()) return;
+
+      board[index] = currentPlayer;
+      renderBoard();
+
+      if (checkWinner()) {
+        statusText.textContent = `${currentPlayer} Wins!`;
+        statusText.classList.remove('hidden');
+        return;
+      }
+
+      if (board.every(cell => cell)) {
+        statusText.textContent = `It's a Draw!`;
+        statusText.classList.remove('hidden');
+        return;
+      }
+
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+
+      if (gameMode === 'computer' && currentPlayer === 'O') {
+        setTimeout(makeComputerMove, 500);
+      }
+    }
+
+    
+    function makeComputerMove() {
+      const availableIndices = board.map((cell, index) => (cell === null ? index : null)).filter(index => index !== null);
+      const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+
+      board[randomIndex] = 'O';
+      renderBoard();
+
+      if (checkWinner()) {
+        statusText.textContent = `O Wins!`;
+        statusText.classList.remove('hidden');
+        return;
+      }
+
+      if (board.every(cell => cell)) {
+        statusText.textContent = `It's a Draw!`;
+        statusText.classList.remove('hidden');
+        return;
+      }
+
+      currentPlayer = 'X';
+    }
+
+
+    function checkWinner() {
+      const winningCombinations = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+      ];
+
+      return winningCombinations.some(combination => {
+        const [a, b, c] = combination;
+        return board[a] && board[a] === board[b] && board[a] === board[c];
+      });
+    }
+    playComputerBtn.addEventListener('click', () => {
+      gameMode = 'computer';
+      startGame();
+    });
+
+    playManualBtn.addEventListener('click', () => {
+      gameMode = 'manual';
+      startGame();
+    });
+
+  
+    function startGame() {
+      board = Array(9).fill(null);
+      currentPlayer = 'X';
+      renderBoard();
+      statusText.classList.add('hidden');
+      gameBoard.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
